@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible problem in mossn
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. A small reproducible example helps a lot.
+  - type: input
+    id: version
+    attributes:
+      label: mossn version
+      placeholder: "0.1.1"
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.11"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, installation method, and anything else that may matter
+      placeholder: "Windows 11, pip install mossn"
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Share the smallest code or data example that reproduces the issue
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior or traceback
+      render: text
+    validations:
+      required: true

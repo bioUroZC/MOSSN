@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+          import re
+
+          pyproject = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+          init_py = pathlib.Path("src/mossn/__init__.py").read_text(encoding="utf-8")
+          tag = os.environ["GITHUB_REF_NAME"]
+
+          pyproject_version = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.MULTILINE)
+          init_version = re.search(r'^__version__\s*=\s*"([^"]+)"', init_py, re.MULTILINE)
+
+          if not pyproject_version or not init_version:
+              raise SystemExit("Could not find version metadata.")
+
+          pyproject_version = pyproject_version.group(1)
+          init_version = init_version.group(1)
+          tag_version = tag.removeprefix("v")
+
+          if pyproject_version != init_version:
+              raise SystemExit(
+                  f"Version mismatch: pyproject.toml={pyproject_version}, __init__.py={init_version}"
+              )
+
+          if tag_version != pyproject_version:
+              raise SystemExit(
+                  f"Tag version {tag_version} does not match package version {pyproject_version}"
+              )
+          PY
+
+      - name: Install build and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          pip install -e .[test]
+
+      - name: Run tests
+        run: pytest
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/*

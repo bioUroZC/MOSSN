@@ -16,6 +16,34 @@ mode and a direct-coupled multi-omics extension.
 - Direct-coupled multi-omics workflow for integrating matched omics layers
 - Bundled example datasets for quick experiments and reproducible demos
 
+## Method Overview
+
+MOSSN builds a sample-specific interaction network by combining a prior
+protein-protein interaction graph with sample-level molecular measurements.
+In the single-omics workflow, the package follows four main steps:
+
+1. Filter the background network and expression matrix to their shared genes.
+2. Reweight each edge using IQR-normalized sample expression and the `gamma`
+   correction strength.
+3. Run random walk with restart from high-expression seed genes, or from a
+   uniform prior when seed selection is disabled.
+4. Combine edge-level correction and node-level importance into final
+   sample-specific edge weights.
+
+The data-driven workflow replaces the prior PPI graph with a graph inferred
+directly from expression correlations. The direct-coupled multi-omics workflow
+adds cross-layer edges linking expression nodes to other omics measurements for
+the same gene, then applies a similar propagation scheme on the coupled graph.
+
+## When To Use Which Workflow
+
+- Use `prepare_data(...)` and `run_single_sample(...)` when you already have a
+  curated PPI network and matched expression data.
+- Use `prepare_data_driven(...)` when you want a graph inferred directly from
+  the expression matrix.
+- Use `prepare_data_direct_coupled(...)` when you have matched expression and
+  additional omics layers such as CNV.
+
 ## Installation
 
 ```bash
@@ -156,6 +184,19 @@ graph, base_weights, expression_data = prepare_data(
 )
 ```
 
+## Output Format
+
+The main scoring functions return a tidy edge table with these columns:
+
+- `Sample`: sample identifier
+- `Node1`: first endpoint of the interaction
+- `Node2`: second endpoint of the interaction
+- `BaseWeight`: background-network edge weight before sample-specific scoring
+- `FinalWeight`: sample-specific edge score returned by MOSSN
+
+This output format is designed to be easy to sort, filter, merge, and export
+for downstream biological analysis.
+
 ## More Examples
 
 ### Use your own network
@@ -270,6 +311,8 @@ from mossn.example_data import (
 ## Repository Guide
 
 - [CONTRIBUTING.md](CONTRIBUTING.md): local development and pull request notes
+- `.github/workflows/`: CI and release automation
+- `.github/ISSUE_TEMPLATE/`: issue forms for bug reports, feature requests, and usage questions
 - `examples/`: runnable scripts
 - `tests/`: automated test suite
 - `src/mossn/`: package source code
