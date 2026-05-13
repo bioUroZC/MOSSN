@@ -5,8 +5,31 @@ __pycache__/
 *.so
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+.hypothesis/
+.tox/
+.nox/
 .venv/
 venv/
+env/
+ENV/
 dist/
 build/
+site/
 *.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Virtual environment and local Python tooling
+.python-version
+
+# IDEs and editors
+.idea/
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
