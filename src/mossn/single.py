@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -20,9 +22,9 @@ from ._utils import (
 
 def prepare_data(
     expression_data: pd.DataFrame,
-    links: pd.DataFrame | None = None,
-    graph: nx.Graph | None = None,
-    base_weights: dict | None = None,
+    links: Optional[pd.DataFrame] = None,
+    graph: Optional[nx.Graph] = None,
+    base_weights: Optional[dict] = None,
     weight_key: str = "score",
     use_prior: bool = True,
     uniform_weight: float = 1.0,
