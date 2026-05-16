@@ -46,6 +46,9 @@ the same gene, then applies a similar propagation scheme on the coupled graph.
 
 ## Installation
 
+`mossn` supports Python 3.9, 3.10, and 3.11. The GitHub Actions CI workflow
+tests these versions on every push and pull request.
+
 ```bash
 pip install mossn
 ```
@@ -322,3 +325,9 @@ from mossn.example_data import (
 `mossn` is distributed under a research-only license. Non-commercial research,
 teaching, and evaluation use are allowed. Commercial use requires prior written
 permission from the copyright holder.
+
+## Development Status
+
+The repository currently maintains CI coverage for Python 3.9, 3.10, and 3.11.
+If you encounter a version-specific issue, please open a GitHub issue and
+include your Python version and a minimal reproduction example.
