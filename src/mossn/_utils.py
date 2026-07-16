@@ -28,11 +28,11 @@ def filter_links_and_expression(links: pd.DataFrame, expression_data: pd.DataFra
     return link_filtered, expression_filtered
 
 
-def build_graph_from_links(links: pd.DataFrame, weight_key: str = "score", default_weight=None):
+def build_graph_from_links(links: pd.DataFrame, uniform_weight: float = 1.0):
     graph = nx.Graph()
     base_weights = {}
     for _, row in links.iterrows():
-        weight = float(default_weight if default_weight is not None else row[weight_key])
+        weight = float(uniform_weight)
         u = row["protein1"]
         v = row["protein2"]
         graph.add_edge(u, v, weight=weight)
@@ -40,20 +40,11 @@ def build_graph_from_links(links: pd.DataFrame, weight_key: str = "score", defau
     return graph, base_weights
 
 
-def filter_graph_and_expression(graph: nx.Graph, expression_data: pd.DataFrame, weight_key: str = "weight"):
+def filter_graph_and_expression(graph: nx.Graph, expression_data: pd.DataFrame):
     common_genes = expression_data.index.intersection(pd.Index(graph.nodes))
     filtered_graph = graph.subgraph(common_genes).copy()
     expression_filtered = expression_data.loc[expression_data.index.isin(filtered_graph.nodes)]
     return filtered_graph, expression_filtered
-
-
-def extract_base_weights(graph: nx.Graph, weight_key: str = "weight", default_weight: float = 1.0):
-    base_weights = {}
-    for u, v, data in graph.edges(data=True):
-        base_weights[(u, v)] = float(data.get(weight_key, default_weight))
-    return base_weights
-
-
 def reset_graph_edge_attributes(graph: nx.Graph, base_weights: dict):
     for (u, v), weight in base_weights.items():
         if graph.has_edge(u, v):

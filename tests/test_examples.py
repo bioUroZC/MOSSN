@@ -16,4 +16,4 @@ def test_example_data_loads():
     links = load_example_links()
     assert expression.shape[0] > 0
     assert expression.shape[1] > 0
-    assert {"protein1", "protein2", "score"}.issubset(links.columns)
+    assert {"protein1", "protein2"}.issubset(links.columns)

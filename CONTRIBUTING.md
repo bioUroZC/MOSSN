@@ -24,10 +24,10 @@ The repository includes a tag-based GitHub Actions release workflow.
 2. Update `src/mossn/__init__.py` to the same version.
 3. Run `pytest`.
 4. Commit the release changes.
-5. Create and push a tag such as `v0.1.2`.
+5. Create and push a tag such as `v0.1.3`.
 
 ```bash
-git tag v0.1.2
+git tag v0.1.3
 git push origin main --tags
 ```
 

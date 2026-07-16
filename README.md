@@ -5,21 +5,22 @@
 [![CI](https://github.com/bioUroZC/MOSSN/actions/workflows/ci.yml/badge.svg)](https://github.com/bioUroZC/MOSSN/actions/workflows/ci.yml)
 
 `mossn` packages the MOSSN algorithm for constructing sample-specific protein
-interaction networks from gene expression data, together with a data-driven
-mode and a direct-coupled multi-omics extension.
+interaction networks from gene expression data, together with a direct-coupled
+multi-omics extension.
 
 ## Highlights
 
 - Single-sample and multi-sample workflows for sample-specific network scoring
 - Support for either a PPI links table or a custom `networkx.Graph`
-- Data-driven graph construction when no prior network is available
 - Direct-coupled multi-omics workflow for integrating matched omics layers
 - Bundled example datasets for quick experiments and reproducible demos
 
 ## Method Overview
 
-MOSSN builds a sample-specific interaction network by combining a prior
+MOSSN builds a sample-specific interaction network by combining a background
 protein-protein interaction graph with sample-level molecular measurements.
+Every background edge starts with the same weight, following the uniform MOSSN
+workflow. Input edge scores are not used.
 In the single-omics workflow, the package follows four main steps:
 
 1. Filter the background network and expression matrix to their shared genes.
@@ -30,17 +31,14 @@ In the single-omics workflow, the package follows four main steps:
 4. Combine edge-level correction and node-level importance into final
    sample-specific edge weights.
 
-The data-driven workflow replaces the prior PPI graph with a graph inferred
-directly from expression correlations. The direct-coupled multi-omics workflow
-adds cross-layer edges linking expression nodes to other omics measurements for
-the same gene, then applies a similar propagation scheme on the coupled graph.
+The direct-coupled multi-omics workflow adds cross-layer edges linking
+expression nodes to other omics measurements for the same gene, then applies a
+similar propagation scheme on the coupled graph.
 
 ## When To Use Which Workflow
 
 - Use `prepare_data(...)` and `run_single_sample(...)` when you already have a
   curated PPI network and matched expression data.
-- Use `prepare_data_driven(...)` when you want a graph inferred directly from
-  the expression matrix.
 - Use `prepare_data_direct_coupled(...)` when you have matched expression and
   additional omics layers such as CNV.
 
@@ -69,7 +67,6 @@ links = pd.DataFrame(
     {
         "protein1": ["A", "A", "B"],
         "protein2": ["B", "C", "C"],
-        "score": [0.8, 0.6, 0.9],
     }
 )
 
@@ -84,7 +81,6 @@ expression_data = pd.DataFrame(
 graph, base_weights, expression_data = prepare_data(
     expression_data=expression_data,
     links=links,
-    use_prior=True,
 )
 
 edge_table = run_single_sample(
@@ -119,14 +115,12 @@ edge_table = run_samples(
 
 ## Core API
 
-The recommended public API consists of these six functions:
+The recommended public API consists of these five functions:
 
 - `prepare_data(...)`: build a single-omics background network from a links
   table or `networkx.Graph`
 - `run_single_sample(...)`: infer a sample-specific network for one sample
 - `run_samples(...)`: run the single-omics workflow across multiple samples
-- `prepare_data_driven(...)`: infer a background graph directly from expression
-  data
 - `prepare_data_direct_coupled(...)`: construct a direct-coupled multi-omics
   graph
 - `run_direct_coupled_single_sample(...)`: score one sample in the direct-coupled
@@ -140,7 +134,10 @@ The `links` table should contain:
 
 - `protein1`
 - `protein2`
-- `score`
+
+Any additional columns, including edge scores, are ignored. Set
+`uniform_weight` in `prepare_data(...)` to choose the common starting weight for
+all background edges.
 
 ### Expression matrix
 
@@ -157,12 +154,11 @@ The single-omics workflow exposes three main numeric parameters:
 - `rwr_alpha`: restart probability in random walk with restart
 - `seed_quantile`: expression quantile used to define seed genes
 
-It also exposes the following switches:
+It also exposes the following switches for sample-specific scoring:
 
 - `use_seed=True`: use high-expression seed genes
 - `use_rwr=True`: use random walk with restart
 - `use_correction=True`: use expression-based edge correction
-- `use_prior=True`: use input edge weights instead of uniform weights
 
 For example, to disable seed genes:
 
@@ -173,17 +169,6 @@ edge_table = run_single_sample(
     base_weights=base_weights,
     expression_data=expression_data,
     use_seed=False,
-)
-```
-
-To ignore prior edge weights and use a uniform network:
-
-```python
-graph, base_weights, expression_data = prepare_data(
-    expression_data=expression_data,
-    links=links,
-    use_prior=False,
-    uniform_weight=1.0,
 )
 ```
 
@@ -210,8 +195,8 @@ from mossn import prepare_data, run_single_sample
 from mossn.example_data import load_example_expression
 
 graph = nx.Graph()
-graph.add_edge("A", "B", weight=0.8)
-graph.add_edge("B", "C", weight=0.6)
+graph.add_edge("A", "B")
+graph.add_edge("B", "C")
 
 expression_data = load_example_expression()
 graph, base_weights, expression_data = prepare_data(
@@ -252,26 +237,6 @@ edge_table = run_single_sample(
 )
 ```
 
-### Data-driven background network
-
-```python
-from mossn import prepare_data_driven, run_samples
-from mossn.example_data import load_example_expression
-
-expression_data = load_example_expression()
-graph, base_weights, expression_data = prepare_data_driven(
-    expression_data=expression_data,
-    cor_threshold=0.9,
-)
-
-edge_table = run_samples(
-    graph=graph,
-    base_weights=base_weights,
-    expression_data=expression_data,
-    sample_ids=[expression_data.columns[0]],
-)
-```
-
 ### Direct-coupled multi-omics
 
 ```python
@@ -308,6 +273,26 @@ from mossn.example_data import (
     get_example_links_path,
     load_example_expression,
     load_example_links,
+)
+```
+
+## Optional Data-Driven Extension
+
+When no background interaction network is available, the optional
+`prepare_data_driven(...)` helper can infer one from expression correlations.
+This is an auxiliary workflow rather than the recommended uniform PPI workflow.
+
+```python
+from mossn import prepare_data_driven, run_samples
+
+graph, base_weights, expression_data = prepare_data_driven(
+    expression_data=expression_data,
+    cor_threshold=0.9,
+)
+edge_table = run_samples(
+    graph=graph,
+    base_weights=base_weights,
+    expression_data=expression_data,
 )
 ```
 

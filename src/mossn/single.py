@@ -9,7 +9,6 @@ from ._utils import (
     build_graph_from_links,
     build_transition_from_graph,
     edge_table_from_graph,
-    extract_base_weights,
     filter_links_and_expression,
     filter_graph_and_expression,
     iqr_normalize,
@@ -24,9 +23,6 @@ def prepare_data(
     expression_data: pd.DataFrame,
     links: Optional[pd.DataFrame] = None,
     graph: Optional[nx.Graph] = None,
-    base_weights: Optional[dict] = None,
-    weight_key: str = "score",
-    use_prior: bool = True,
     uniform_weight: float = 1.0,
 ):
     if links is None and graph is None:
@@ -36,14 +32,12 @@ def prepare_data(
 
     if links is not None:
         filtered_links, expression_filtered = filter_links_and_expression(links, expression_data)
-        if use_prior:
-            graph_obj, base_weights_obj = build_graph_from_links(filtered_links, weight_key=weight_key)
-        else:
-            graph_obj, base_weights_obj = build_graph_from_links(filtered_links, default_weight=uniform_weight)
+        graph_obj, base_weights_obj = build_graph_from_links(filtered_links, uniform_weight=uniform_weight)
         return graph_obj, base_weights_obj, expression_filtered
 
-    filtered_graph, expression_filtered = filter_graph_and_expression(graph, expression_data, weight_key=weight_key)
-    base_weights_obj = base_weights if base_weights is not None else extract_base_weights(filtered_graph, weight_key=weight_key)
+    filtered_graph, expression_filtered = filter_graph_and_expression(graph, expression_data)
+    base_weights_obj = {(u, v): float(uniform_weight) for u, v in filtered_graph.edges()}
+    reset_graph_edge_attributes(filtered_graph, base_weights_obj)
     return filtered_graph, base_weights_obj, expression_filtered
 
 

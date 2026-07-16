@@ -12,7 +12,6 @@ def make_links():
         {
             "protein1": ["A", "A", "B", "D"],
             "protein2": ["B", "C", "C", "E"],
-            "score": [0.8, 0.5, 0.9, 0.4],
         }
     )
 
@@ -45,18 +44,29 @@ def test_clean_main_api_runs():
         seed_quantile=0.8,
     )
     assert_edge_table(table, "s1")
+    assert set(base_weights.values()) == {1.0}
 
 
 def test_main_api_supports_uniform_weights():
     graph, base_weights, expression = prepare_data(
         expression_data=make_expression(),
         links=make_links(),
-        use_prior=False,
-        uniform_weight=1.0,
+        uniform_weight=2.0,
     )
     table = run_single_sample("s1", graph, base_weights, expression)
     assert_edge_table(table, "s1")
-    assert table["BaseWeight"].nunique() == 1
+    assert set(table["BaseWeight"]) == {2.0}
+
+
+def test_link_scores_are_ignored():
+    links = make_links().assign(score=[0.8, 0.5, 0.9, 0.4])
+    graph, base_weights, expression = prepare_data(
+        expression_data=make_expression(),
+        links=links,
+    )
+    table = run_single_sample("s1", graph, base_weights, expression)
+    assert_edge_table(table, "s1")
+    assert set(table["BaseWeight"]) == {1.0}
 
 
 def test_main_api_supports_no_seed():
@@ -91,13 +101,13 @@ def test_clean_main_api_accepts_custom_graph():
     assert_edge_table(table, "s1")
     assert graph.number_of_nodes() == 5
     assert len(base_weights) == graph.number_of_edges()
+    assert set(base_weights.values()) == {1.0}
 
 
 def test_uniform_pipeline_uses_constant_base_weights():
     graph, base_weights, expression = prepare_data(
         expression_data=make_expression(),
         links=make_links(),
-        use_prior=False,
         uniform_weight=1.0,
     )
     table = run_single_sample("s1", graph, base_weights, expression)

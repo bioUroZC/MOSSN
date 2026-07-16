@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mossn"
-version = "0.1.1"
-description = "MOSSN: sample-specific protein network inference from gene expression with a direct-coupled multi-omics extension"
+version = "0.1.3"
+description = "MOSSN: sample-specific protein network inference using uniform background edge weights"
 readme = "README.md"
 requires-python = ">=3.9"
-license = "LicenseRef-Research-Only"
+license = { file = "LICENSE" }
 authors = [
   { name = "Zihao Chen" }
 ]

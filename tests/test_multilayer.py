@@ -8,7 +8,6 @@ def make_links():
         {
             "protein1": ["A", "A", "B"],
             "protein2": ["B", "C", "C"],
-            "score": [0.8, 0.5, 0.9],
         }
     )
 
@@ -48,3 +47,4 @@ def test_direct_coupled_pipeline_runs():
     )
     assert not table.empty
     assert set(table.columns) == {"Sample", "Node1", "Node2", "BaseWeight", "FinalWeight"}
+    assert set(table["BaseWeight"]) == {1.0}

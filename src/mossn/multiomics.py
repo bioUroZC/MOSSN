@@ -6,7 +6,7 @@ from scipy.sparse import csr_matrix
 from ._utils import iqr_normalize, normalize_sample_id, run_rwr
 
 
-def prepare_data_direct(links: pd.DataFrame, omic_data: dict, direct_omics):
+def prepare_data_direct(links: pd.DataFrame, omic_data: dict, direct_omics, uniform_weight: float = 1.0):
     all_omics = {"EXP": omic_data["EXP"]}
     for omic in direct_omics:
         if omic in omic_data:
@@ -41,8 +41,8 @@ def prepare_data_direct(links: pd.DataFrame, omic_data: dict, direct_omics):
     for _, row in filtered_links.iterrows():
         u = row["protein1"]
         v = row["protein2"]
-        graph.add_edge(u, v, weight=row["score"])
-        weights[(u, v)] = row["score"]
+        graph.add_edge(u, v, weight=float(uniform_weight))
+        weights[(u, v)] = float(uniform_weight)
 
     for omic in direct_omics:
         if omic not in all_omics:
@@ -56,8 +56,18 @@ def prepare_data_direct(links: pd.DataFrame, omic_data: dict, direct_omics):
     return graph, weights, all_omics, list(common_genes)
 
 
-def prepare_data_direct_coupled(links: pd.DataFrame, omic_data: dict, coupled_omics):
-    return prepare_data_direct(links=links, omic_data=omic_data, direct_omics=coupled_omics)
+def prepare_data_direct_coupled(
+    links: pd.DataFrame,
+    omic_data: dict,
+    coupled_omics,
+    uniform_weight: float = 1.0,
+):
+    return prepare_data_direct(
+        links=links,
+        omic_data=omic_data,
+        direct_omics=coupled_omics,
+        uniform_weight=uniform_weight,
+    )
 
 
 def run_direct_single_sample(
