@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 from scipy.sparse import csr_matrix
+from scipy.stats import rankdata
 
 
 def normalize_sample_id(sample_id: str) -> str:
@@ -105,8 +106,8 @@ def run_rwr(transition, p0, rwr_alpha: float = 0.3, max_iter: int = 50, tol: flo
 
 
 def rank_normalize(values):
-    ranks = np.argsort(np.argsort(values))
-    return ranks / max(len(values) - 1, 1)
+    ranks = rankdata(values, method="average")
+    return (ranks - 1) / max(len(values) - 1, 1)
 
 
 def edge_table_from_graph(sample_id: str, graph: nx.Graph, base_weights: dict, importance, node_to_index: dict):

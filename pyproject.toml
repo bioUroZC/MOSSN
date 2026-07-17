@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mossn"
-version = "0.1.3"
+version = "0.1.4"
 description = "MOSSN: sample-specific protein network inference using uniform background edge weights"
 readme = "README.md"
 requires-python = ">=3.9"

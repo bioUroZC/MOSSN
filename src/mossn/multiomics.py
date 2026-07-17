@@ -3,7 +3,7 @@ import pandas as pd
 import networkx as nx
 from scipy.sparse import csr_matrix
 
-from ._utils import iqr_normalize, normalize_sample_id, run_rwr
+from ._utils import iqr_normalize, normalize_sample_id, rank_normalize, run_rwr
 
 
 def prepare_data_direct(links: pd.DataFrame, omic_data: dict, direct_omics, uniform_weight: float = 1.0):
@@ -152,8 +152,7 @@ def run_direct_single_sample(
     p = run_rwr(transition, p0, rwr_alpha=rwr_alpha)
     exp_idx = [idx[gene] for gene in exp_genes if gene in idx]
     p_exp_sub = p[exp_idx]
-    ranks_sub = np.argsort(np.argsort(p_exp_sub))
-    norm_sub = ranks_sub / max(len(ranks_sub) - 1, 1)
+    norm_sub = rank_normalize(p_exp_sub)
 
     importance = np.zeros(len(nodes))
     for rank_i, node_i in enumerate(exp_idx):
