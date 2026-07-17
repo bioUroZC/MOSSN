@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest an enhancement to mossn
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Please describe the research or workflow need behind it.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or workflow gap
+      description: What are you trying to do that is hard today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API, behavior, or workflow you would like to see
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds or related tools you already tried
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Papers, datasets, use cases, or screenshots that help explain the request
